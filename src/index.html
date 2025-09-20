@@ -9,9 +9,11 @@
 
 <body>
     <h2>Image converter</h2>
-    <p>Upload image and press convert, then press Download to download converted file.</p>
+    <p>Upload image and press convert, then press Download to download converted file.<br>Works best with cropped images, as it will resize it to 240x135px</p>
     <input type="file" id="fileInput" accept="image/*">
+    <br>
     <button id="convertBtn">Convert</button>
+    <br>
     <a id="downloadLink" style="display:none;">Download BIN</a>
 
     <canvas id="canvas" width="240" height="135" style="display:none;"></canvas>
