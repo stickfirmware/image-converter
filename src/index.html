@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Image Converter</title>
+</head>
+
+<body>
+    <h2>Image converter</h2>
+    <p>Upload image and press convert, then press Download to download converted file.</p>
+    <input type="file" id="fileInput" accept="image/*">
+    <button id="convertBtn">Convert</button>
+    <a id="downloadLink" style="display:none;">Download BIN</a>
+
+    <canvas id="canvas" width="240" height="135" style="display:none;"></canvas>
+
+    <script>
+        const fileInput = document.getElementById("fileInput");
+        const convertBtn = document.getElementById("convertBtn");
+        const downloadLink = document.getElementById("downloadLink");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        function quantize16(pixel) {
+            return Math.floor(pixel * 15 / 255);
+        }
+
+        convertBtn.addEventListener("click", () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const img = new Image();
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0, 240, 135);
+                const imgData = ctx.getImageData(0, 0, 240, 135);
+                const data = imgData.data;
+
+                let bytes = [];
+                for (let y = 0; y < 135; y++) {
+                    for (let x = 0; x < 240; x += 2) {
+                        // pixel1
+                        let i1 = (y * 240 + x) * 4;
+                        let gray1 = 0.299 * data[i1] + 0.587 * data[i1 + 1] + 0.114 * data[i1 + 2];
+                        let p1 = quantize16(gray1);
+
+                        // pixel2
+                        let p2 = 0;
+                        if (x + 1 < 240) {
+                            let i2 = (y * 240 + (x + 1)) * 4;
+                            let gray2 = 0.299 * data[i2] + 0.587 * data[i2 + 1] + 0.114 * data[i2 + 2];
+                            p2 = quantize16(gray2);
+                        }
+
+                        let byte = (p1 << 4) | p2;
+                        bytes.push(byte);
+                    }
+                }
+
+                // Save
+                const blob = new Blob([new Uint8Array(bytes)], { type: "application/octet-stream" });
+                const url = URL.createObjectURL(blob);
+
+                downloadLink.href = url;
+                downloadLink.download = "image.bin";
+                downloadLink.style.display = "inline";
+                downloadLink.textContent = "Download image.bin";
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    </script>
+
+    <footer>
+      Made with ❤️ by Kitki30
+      https://github.com/stickfirmware/image-converter
+    </footer>
+</body>
+
+</html>
