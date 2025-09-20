@@ -15,8 +15,9 @@
     <button id="convertBtn">Convert</button>
     <br>
     <a id="downloadLink" style="display:none;">Download BIN</a>
-
-    <canvas id="canvas" width="240" height="135" style="display:none;"></canvas>
+    <br>
+    <p>Preview:</p>
+    <canvas id="canvas" width="240" height="135"></canvas>
 
     <script>
         const fileInput = document.getElementById("fileInput");
@@ -60,6 +61,23 @@
                     }
                 }
 
+                // Preview
+                for (let y = 0; y < 135; y++) {
+                    for (let x = 0; x < 240; x++) {
+                        let idx = y * 120 + Math.floor(x / 2);
+                        let byte = bytes[idx];
+                        let gray = (x % 2 === 0) ? (byte >> 4) & 0x0F : byte & 0x0F;
+                        let col = gray * 17;
+
+                        let pixelIdx = (y * 240 + x) * 4;
+                        imgData.data[pixelIdx] = col;
+                        imgData.data[pixelIdx + 1] = col;
+                        imgData.data[pixelIdx + 2] = col;
+                        imgData.data[pixelIdx + 3] = 255;
+                    }
+                }
+                ctx.putImageData(imgData, 0, 0);
+
                 // Save
                 const blob = new Blob([new Uint8Array(bytes)], { type: "application/octet-stream" });
                 const url = URL.createObjectURL(blob);
@@ -74,10 +92,10 @@
     </script>
 
     <footer>
-    <br>
-      Made with ❤️ by Kitki30
-    <br>
-      https://github.com/stickfirmware/image-converter
+        <br>
+        Made with ❤️ by Kitki30
+        <br>
+        https://github.com/stickfirmware/image-converter
     </footer>
 </body>
 
